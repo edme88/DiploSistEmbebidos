@@ -1,4 +1,6 @@
-DiploSistEmbebidos
-==================
+TP4-Interrupciones-Timer-y-Boton
+================================
 
-Diplomatura en Sistemas Embebidos - STM32F407 Discovery
+Trabajo Practico Nro 4. 
+
+Projecto bien formado con Interrupcion de timer y pulsador.
