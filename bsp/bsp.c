@@ -20,10 +20,12 @@
 GPIO_TypeDef* leds_port[] = { GPIOD, GPIOD, GPIOD, GPIOD };
 /* Leds disponibles */
 const uint16_t leds[] = { LED_V, LED_R, LED_N, LED_A };
+volatile uint16_t bsp_contMS = 0;
 
 //---------------------- Seccion de Declaracion de Funciones -------------------------
 extern void APP_ISR_sw(void);
 extern void APP_ISR_1ms(void);
+void bsp_delayms(uint16_t miliseconds);
 
 //------------------------------------- FUNCIONES -----------------------------------
 void led_on(uint8_t led) {
@@ -55,11 +57,14 @@ void EXTI0_IRQHandler(void) {
  * @brief Interrupcion llamada al pasar 1ms
  */
 void TIM2_IRQHandler(void) {
-	static uint16_t count = 0; //Es estática para que no se inicialice cada vez que se llama a la función
+	//uint16_t count = 0; //Es estática para que no se inicialice cada vez que se llama a la función
 
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) {
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 		APP_ISR_1ms();
+		if (bsp_contMS) {
+			bsp_contMS--;
+		}
 	}
 }
 
@@ -74,7 +79,7 @@ void bsp_init() {
 
 }
 
-void led_toggle(uint8_t led){
+void led_toggle(uint8_t led) {
 	GPIO_ToggleBits(leds_port[led], leds[led]);
 }
 
@@ -161,4 +166,9 @@ void bsp_timer_config(void) {
 	/* TIM2 contador habilitado */
 	TIM_Cmd(TIM2, ENABLE);
 
+}
+
+bsp_delayms(uint16_t x) {
+	bsp_contMS = x;
+	while (bsp_contMS);
 }
