@@ -8,6 +8,7 @@
 #include "misc.h"				// Vectores de interrupciones (NVIC)
 #include "bsp.h"
 
+// Definiciones de hardware
 #define LED_V GPIO_Pin_12
 #define LED_N GPIO_Pin_13
 #define LED_R GPIO_Pin_14
@@ -20,6 +21,10 @@ GPIO_TypeDef* leds_port[] = { GPIOD, GPIOD, GPIOD, GPIOD };
 /* Leds disponibles */
 const uint16_t leds[] = { LED_V, LED_R, LED_N, LED_A };
 
+//---------------------- Seccion de Declaracion de Funciones -------------------------
+extern void APP_ISR_sw(void);
+
+//------------------------------------- FUNCIONES -----------------------------------
 void led_on(uint8_t led) {
 	GPIO_SetBits(leds_port[led], leds[led]);
 }
@@ -33,14 +38,14 @@ uint8_t sw_getState(void) {
 }
 
 /**
- * @brief Interrupcion llamada cuando se preciona el pulsador
+ * @brief Interrupcion llamada cuando se presiona el pulsador
  */
 void EXTI0_IRQHandler(void) {
 
-	if (EXTI_GetITStatus(EXTI_Line0) != RESET) //Verificamos si es la del pin configurado
-			{
+	if (EXTI_GetITStatus(EXTI_Line0) != RESET) { //Verificamos si es la del pin configurado
 		EXTI_ClearFlag(EXTI_Line0); // Limpiamos la Interrupcion
 		// Rutina:
+		APP_ISR_sw();
 		GPIO_ToggleBits(leds_port[1], leds[1]);
 	}
 }
@@ -69,6 +74,10 @@ void bsp_init() {
 	bsp_sw_init();
 	bsp_timer_config();
 
+}
+
+void led_toggle(uint8_t led){
+	GPIO_ToggleBits(leds_port[led], leds[led]);
 }
 
 /**
@@ -116,7 +125,7 @@ void bsp_sw_init() {
 	/* Configuro EXTI Line */
 	EXTI_InitStructure.EXTI_Line = EXTI_Line0;
 	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
 	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
 	EXTI_Init(&EXTI_InitStructure);
 
