@@ -23,6 +23,7 @@ const uint16_t leds[] = { LED_V, LED_R, LED_N, LED_A };
 
 //---------------------- Seccion de Declaracion de Funciones -------------------------
 extern void APP_ISR_sw(void);
+extern void APP_ISR_1ms(void);
 
 //------------------------------------- FUNCIONES -----------------------------------
 void led_on(uint8_t led) {
@@ -54,14 +55,11 @@ void EXTI0_IRQHandler(void) {
  * @brief Interrupcion llamada al pasar 1ms
  */
 void TIM2_IRQHandler(void) {
-	static uint16_t count = 0;
+	static uint16_t count = 0; //Es estática para que no se inicialice cada vez que se llama a la función
 
 	if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) {
 		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-		if (count++ > 1000) {
-			GPIO_ToggleBits(leds_port[0], leds[0]);
-			count = 0;
-		}
+		APP_ISR_1ms();
 	}
 }
 
